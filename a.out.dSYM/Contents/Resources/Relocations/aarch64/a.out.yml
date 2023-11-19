@@ -1,0 +1,17 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     a.out
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _strip, symObjAddr: 0x0, symBinAddr: 0x1000030E4, symSize: 0x70 }
+  - { offsetInCU: 0x19D, offset: 0x19D, size: 0x8, addend: 0x0, symName: _strip, symObjAddr: 0x0, symBinAddr: 0x1000030E4, symSize: 0x70 }
+  - { offsetInCU: 0x1C5, offset: 0x1C5, size: 0x8, addend: 0x0, symName: _read_accounts, symObjAddr: 0x70, symBinAddr: 0x100003154, symSize: 0x1B0 }
+  - { offsetInCU: 0x24B, offset: 0x24B, size: 0x8, addend: 0x0, symName: _view_accounts, symObjAddr: 0x220, symBinAddr: 0x100003304, symSize: 0xF8 }
+  - { offsetInCU: 0x299, offset: 0x299, size: 0x8, addend: 0x0, symName: _free_accounts, symObjAddr: 0x318, symBinAddr: 0x1000033FC, symSize: 0x14 }
+  - { offsetInCU: 0x2CB, offset: 0x2CB, size: 0x8, addend: 0x0, symName: _authenticate_account, symObjAddr: 0x32C, symBinAddr: 0x100003410, symSize: 0xF8 }
+  - { offsetInCU: 0x339, offset: 0x339, size: 0x8, addend: 0x0, symName: _find_account, symObjAddr: 0x424, symBinAddr: 0x100003508, symSize: 0xA0 }
+  - { offsetInCU: 0x399, offset: 0x399, size: 0x8, addend: 0x0, symName: _view_transaction, symObjAddr: 0x4C4, symBinAddr: 0x1000035A8, symSize: 0x12C }
+  - { offsetInCU: 0x3BD, offset: 0x3BD, size: 0x8, addend: 0x0, symName: _get_transaction, symObjAddr: 0x600, symBinAddr: 0x1000036E4, symSize: 0x234 }
+  - { offsetInCU: 0x401, offset: 0x401, size: 0x8, addend: 0x0, symName: _handle_transaction, symObjAddr: 0x834, symBinAddr: 0x100003918, symSize: 0x254 }
+  - { offsetInCU: 0x46B, offset: 0x46B, size: 0x8, addend: 0x0, symName: _issue_reward, symObjAddr: 0xA88, symBinAddr: 0x100003B6C, symSize: 0x90 }
+  - { offsetInCU: 0x4B9, offset: 0x4B9, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0xB18, symBinAddr: 0x100003BFC, symSize: 0x184 }
+...
