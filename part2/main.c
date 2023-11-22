@@ -4,6 +4,8 @@
 #include "account.h"
 #include "transaction.h"
 #include "utils.h"
+#include <unistd.h>
+#include "worker_thread.h"
 
 int main(int argc, char **argv) {
     FILE *f;
@@ -13,7 +15,8 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    int num_accounts = get_num_accounts(f);
+    /*ACCOUNTS*/
+    int num_accounts = read_num_accounts(f);
 
     account *accounts = (account *) malloc(sizeof(account) * num_accounts); //array of accounts
 
@@ -21,30 +24,33 @@ int main(int argc, char **argv) {
 
     view_accounts(accounts, num_accounts);
 
-    TransactionsQueue *tq = init_transactions_queue();
+    /*TRANSACTIONS*/
+    TransactionQueue *tq = init_transaction_queue();
 
     size_t len = 128; char *line = malloc(sizeof(char) * len);  ssize_t read;
 
-    //read transactions
     while((read = getline(&line, &len, f)) != -1) {
-        tq->enqueue(tq, get_transaction(line));
-
-        Transaction *t = tq->dequeue(tq);
-        
-        view_transaction(t);
-
-        handle_transaction(t, accounts, num_accounts);
+        tq->enqueue(tq, read_transaction(line));
     }
 
+    free(line);
+
+    /*WORKER THREADS*/
+    WorkerThread *wts = init_worker_threads(tq, accounts, num_accounts);
+
+    for(int i = 0; i < THREAD_POOL_SIZE; i++) {
+        pthread_join(wts[i].thread, NULL);
+    }
+
+    free_transactions_queue(tq);
+
+    /*REWARD*/
     issue_reward(accounts, num_accounts);
 
+    /*THE END*/
     printf("\n");
 
     view_accounts(accounts, num_accounts);
-
-    free(line);
-    free_accounts(accounts, num_accounts);
-    free_transactions_queue(tq);
 
     fclose(f);
 

@@ -22,7 +22,7 @@ typedef struct
 
 void view_transaction(Transaction *t);
 
-Transaction *get_transaction(char *line);
+Transaction *read_transaction(char *line);
 
 void handle_transaction(Transaction *t, account *accounts, int num_accounts);
 

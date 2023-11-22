@@ -16,7 +16,7 @@ typedef struct
     pthread_mutex_t ac_lock;
 } account;
 
-int get_num_accounts(FILE *f);
+int read_num_accounts(FILE *f);
 
 void view_accounts(account *accounts, int num_accounts);
 

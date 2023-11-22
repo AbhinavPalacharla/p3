@@ -30,12 +30,12 @@ int main(int argc, char **argv) {
 
     //read transactions
     while((read = getline(&line, &len, f)) != -1) {
-        Transaction *t = get_transaction(line);
+        Transaction *t = read_transaction(line);
         view_transaction(t);
         handle_transaction(t, accounts, num_accounts);
     }
 
-    issue_reward(accounts, num_accounts);
+    // issue_reward(accounts, num_accounts);
 
     printf("\n");
 

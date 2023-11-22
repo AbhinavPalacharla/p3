@@ -5,27 +5,22 @@
 #include "transaction.h"
 #include "account.h"
 
-void enqueue(TransactionsQueue *self, Transaction *t)
+void enqueue(TransactionQueue *self, Transaction *t)
 {
-    if (self->size == 0)
-    {
+    if (self->size == 0) {
         self->head = t;
         self->tail = t;
-    }
-    else
-    {
+    } else {
         self->tail->next = t;
         self->tail = t;
     }
+
     self->size++;
 }
 
-Transaction *dequeue(TransactionsQueue *self)
+Transaction *dequeue(TransactionQueue *self)
 {
-    if (self->size == 0)
-    {
-        return NULL;
-    }
+    if (self->size == 0) { return NULL; }
 
     Transaction *t = self->head;
     self->head = self->head->next;
@@ -34,9 +29,9 @@ Transaction *dequeue(TransactionsQueue *self)
     return t;
 }
 
-TransactionsQueue *init_transactions_queue()
+TransactionQueue *init_transaction_queue()
 {
-    TransactionsQueue *q = (TransactionsQueue *)malloc(sizeof(TransactionsQueue));
+    TransactionQueue *q = (TransactionQueue *)malloc(sizeof(TransactionQueue));
     q->head = NULL;
     q->tail = NULL;
     q->size = 0;
@@ -47,12 +42,25 @@ TransactionsQueue *init_transactions_queue()
     return q;
 }
 
+void view_transaction_queue(TransactionQueue *tq)
+{
+    Transaction *t = tq->head;
+
+    while (t != NULL)
+    {
+        view_transaction(t);
+        t = t->next;
+    }
+
+    printf("\n");
+}
+
 void free_transaction(Transaction *t)
 {
     free(t);
 }
 
-void free_transactions_queue(TransactionsQueue *tq)
+void free_transactions_queue(TransactionQueue *tq)
 {
     Transaction *t = tq->head;
     Transaction *next;
@@ -96,7 +104,7 @@ void view_transaction(Transaction *t)
     printf("(AMOUNT) %f\n", t->amount);
 }
 
-Transaction *get_transaction(char *line)
+Transaction *read_transaction(char *line)
 {
     Transaction *t = (Transaction *)malloc(sizeof(Transaction));
 
@@ -163,12 +171,22 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
     }
 
     if(t->type == DEPOSIT) {
+        pthread_mutex_lock(&accounts[account_index].ac_lock);
+        
         accounts[account_index].balance += t->amount;
         accounts[account_index].transaction_tracter += t->amount;
+        
+        pthread_mutex_unlock(&accounts[account_index].ac_lock);
     } else if(t->type == WITHDRAW) {
+        pthread_mutex_lock(&accounts[account_index].ac_lock);
+
         accounts[account_index].balance -= t->amount;
         accounts[account_index].transaction_tracter += t->amount;
+
+        pthread_mutex_unlock(&accounts[account_index].ac_lock);
     } else if(t->type == TRANSFER) {
+        // return;
+
         int dest = find_account(t->destination_account, accounts, num_accounts);
 
         if(dest == -1) {
@@ -176,10 +194,24 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
             return;
         }
 
+        pthread_mutex_lock(&accounts[account_index].ac_lock);
+        
         accounts[account_index].balance -= t->amount;
         accounts[account_index].transaction_tracter += t->amount;
+        
+        pthread_mutex_unlock(&accounts[account_index].ac_lock);
+
+        pthread_mutex_lock(&accounts[dest].ac_lock);
+
+        
         accounts[dest].balance += t->amount;
+
+        pthread_mutex_unlock(&accounts[dest].ac_lock);
     } else if(t->type == CHECK_BALANCE) {
+        pthread_mutex_lock(&accounts[account_index].ac_lock);
+
         printf("BALANCE: %f\n", accounts[account_index].balance);
+
+        pthread_mutex_unlock(&accounts[account_index].ac_lock);
     }
 }

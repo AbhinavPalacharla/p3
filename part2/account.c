@@ -16,7 +16,7 @@ void view_accounts(account *accounts, int num_accounts)
     printf("\n");
 }
 
-int get_num_accounts(FILE *f)
+int read_num_accounts(FILE *f)
 {
     size_t len = 128; char *line = malloc(sizeof(char) * len); ssize_t read;
 
@@ -52,6 +52,11 @@ void read_accounts(account *accounts, FILE *f, int num_accounts)
         accounts[i].reward_rate = strtod(strip(line), NULL);
 
         accounts[i].transaction_tracter = 0;
+
+        if(pthread_mutex_init(&accounts[i].ac_lock, NULL) != 0) {
+            printf("Error initializing mutex\n");
+            exit(1);
+        }
     }
 
     free(line);
@@ -93,7 +98,7 @@ int authenticate_account(char *account_number, char *password, account *accounts
         }
     }
 
-    printf("Failed to authenticate account %s | %s\n", account_number, password);
+    // printf("Failed to authenticate account %s | %s\n", account_number, password);
 
     return -1;
 }

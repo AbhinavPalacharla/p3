@@ -34,7 +34,7 @@ void view_transaction(Transaction *t)
     printf("(AMOUNT) %f\n", t->amount);
 }
 
-Transaction *get_transaction(char *line)
+Transaction *read_transaction(char *line)
 {
     Transaction *t = (Transaction *)malloc(sizeof(Transaction));
 
@@ -107,6 +107,7 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
         accounts[account_index].balance -= t->amount;
         accounts[account_index].transaction_tracter += t->amount;
     } else if(t->type == TRANSFER) {
+        // return;
         int dest = find_account(t->destination_account, accounts, num_accounts);
 
         if(dest == -1) {
