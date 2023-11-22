@@ -38,10 +38,6 @@ int main(int argc, char **argv) {
     /*WORKER THREADS*/
     WorkerThread *wts = init_worker_threads(tq, accounts, num_accounts);
 
-    for(int i = 0; i < THREAD_POOL_SIZE; i++) {
-        pthread_join(wts[i].thread, NULL);
-    }
-
     free_transactions_queue(tq);
 
     /*REWARD*/

@@ -39,6 +39,7 @@ WorkerThread *init_worker_threads(TransactionQueue *tq, account *accounts, int n
         }
     }
 
+    //create threads
     for(int i = 0; i < THREAD_POOL_SIZE; i++) {
         ThreadHandlerArgs *args = (ThreadHandlerArgs *) malloc(sizeof(ThreadHandlerArgs));
         
@@ -47,6 +48,7 @@ WorkerThread *init_worker_threads(TransactionQueue *tq, account *accounts, int n
         args->num_accounts = num_accounts;
 
         pthread_create(&wts[i].thread, NULL, thread_handler, (void *) args);
+        pthread_join(wts[i].thread, NULL);
     }
 
     return wts;
