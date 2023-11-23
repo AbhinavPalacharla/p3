@@ -11,7 +11,6 @@ enum TRNASACTION_TYPE
     TRANSFER,
     CHECK_BALANCE
 };
-
 typedef struct _Transaction
 {
     enum TRNASACTION_TYPE type;
@@ -19,17 +18,16 @@ typedef struct _Transaction
     char password[9];
     double amount;
     char destination_account[17];
-    struct Transaction *next;
+    struct _Transaction *next;
 } Transaction;
-
 typedef struct _TransactionsQueue
 {
     Transaction *head;
     Transaction *tail;
     int size;
 
-    void (*enqueue)(struct TransactionsQueue *self, Transaction *t);
-    Transaction *(*dequeue)(struct TransactionsQueue *self);
+    void (*enqueue)(struct _TransactionsQueue *self, Transaction *t);
+    Transaction *(*dequeue)(struct _TransactionsQueue *self);
 } TransactionQueue;
 
 TransactionQueue *init_transaction_queue();

@@ -16,7 +16,7 @@ void view_accounts(account *accounts, int num_accounts)
     printf("\n");
 }
 
-int get_num_accounts(FILE *f)
+int read_num_accounts(FILE *f)
 {
     size_t len = 128; char *line = malloc(sizeof(char) * len); ssize_t read;
 

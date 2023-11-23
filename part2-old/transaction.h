@@ -22,20 +22,17 @@ typedef struct _Transaction
     struct Transaction *next;
 } Transaction;
 
-typedef struct _TransactionsQueue 
+typedef struct _TransactionsQueue
 {
     Transaction *head;
     Transaction *tail;
     int size;
-    // pthread_mutex_t lock;
-    
+
     void (*enqueue)(struct TransactionsQueue *self, Transaction *t);
-    Transaction *(*dequeue)(struct TransactionsQueue *self); 
+    Transaction *(*dequeue)(struct TransactionsQueue *self);
 } TransactionQueue;
 
 TransactionQueue *init_transaction_queue();
-void enqueue(TransactionQueue *self, Transaction *t);
-Transaction *dequeue(TransactionQueue *self);
 
 void view_transaction(Transaction *t);
 void view_transaction_queue(TransactionQueue *tq);

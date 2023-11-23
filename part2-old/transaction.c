@@ -7,12 +7,6 @@
 
 void enqueue(TransactionQueue *self, Transaction *t)
 {
-    // printf("Enqueueing transaction...\n");
-
-    // pthread_mutex_lock(&self->lock);
-
-    // printf("Inside Enqueue lock\n");
-
     if (self->size == 0) {
         self->head = t;
         self->tail = t;
@@ -22,28 +16,15 @@ void enqueue(TransactionQueue *self, Transaction *t)
     }
 
     self->size++;
-
-    // pthread_mutex_unlock(&self->lock);
-
-    // printf("Transaction enqueued\n");
 }
 
 Transaction *dequeue(TransactionQueue *self)
 {
-    // printf("Dequeueing transaction...\n");
-    // pthread_mutex_lock(&self->lock);
-
-    // printf("Inside Dequeue lock\n");
-    
-    // if (self->size == 0) { pthread_mutex_unlock(&self->lock); return NULL; }
     if (self->size == 0) { return NULL; }
 
     Transaction *t = self->head;
     self->head = self->head->next;
     self->size--;
-    
-    // pthread_mutex_unlock(&self->lock);
-    // printf("Transaction dequeued\n");
 
     return t;
 }
@@ -57,12 +38,6 @@ TransactionQueue *init_transaction_queue()
     
     q->enqueue = &enqueue;
     q->dequeue = &dequeue;
-
-    // printf("Initializing mutex...\n");
-    // if(pthread_mutex_init(&q->lock, NULL) != 0) {
-    //     // printf("Error initializing mutex\n");
-    //     exit(1);
-    // }
     
     return q;
 }
@@ -232,17 +207,6 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
         accounts[dest].balance += t->amount;
 
         pthread_mutex_unlock(&accounts[dest].ac_lock);
-
-        // pthread_mutex_lock(&accounts[account_index].ac_lock);
-        // pthread_mutex_lock(&accounts[dest].ac_lock);
-
-        // accounts[account_index].balance -= t->amount;
-        // accounts[account_index].transaction_tracter += t->amount;
-        // accounts[dest].balance += t->amount;
-
-        // pthread_mutex_unlock(&accounts[account_index].ac_lock);
-        // pthread_mutex_unlock(&accounts[dest].ac_lock);
-
     } else if(t->type == CHECK_BALANCE) {
         pthread_mutex_lock(&accounts[account_index].ac_lock);
 

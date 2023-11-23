@@ -10,7 +10,7 @@ void view_accounts(account *accounts, int num_accounts)
 
     for (int i = 0; i < num_accounts; i++)
     {
-        printf("[%d/%d]\t (#) %s\t (PASSWD) %s\t (BAL) %f\t RR %lf \n", i + 1, num_accounts, accounts[i].account_number, accounts[i].password, accounts[i].balance, accounts[i].reward_rate);
+        printf("[%d/%d]\t (#) %s\t (PASSWD) %s\t (BAL) %.2f\t RR %lf \n", i + 1, num_accounts, accounts[i].account_number, accounts[i].password, accounts[i].balance, accounts[i].reward_rate);
     }
 
     printf("\n");
@@ -18,9 +18,9 @@ void view_accounts(account *accounts, int num_accounts)
 
 int read_num_accounts(FILE *f)
 {
-    size_t len = 128; char *line = malloc(sizeof(char) * len); ssize_t read;
+    size_t len = 128; char *line = malloc(sizeof(char) * len);
 
-    read = getline(&line, &len, f);
+    getline(&line, &len, f);
 
     int num_accounts = atoi(line);
 
@@ -31,24 +31,22 @@ int read_num_accounts(FILE *f)
 
 void read_accounts(account *accounts, FILE *f, int num_accounts)
 {
-    size_t len = 128;
-    char *line = malloc(sizeof(char) * len);
-    ssize_t read;
+    size_t len = 128; char *line = malloc(sizeof(char) * len);
 
     for (int i = 0; i < num_accounts; i++)
     {
         getline(&line, &len, f); // skip index line
 
-        read = getline(&line, &len, f); // account number
+        getline(&line, &len, f); // account number
         strcpy(accounts[i].account_number, strip(line));
 
-        read = getline(&line, &len, f); // account password
+        getline(&line, &len, f); // account password
         strcpy(accounts[i].password, strip(line));
 
-        read = getline(&line, &len, f); // initial balance
+        getline(&line, &len, f); // initial balance
         accounts[i].balance = atof(strip(line));
 
-        read = getline(&line, &len, f); // reward rate
+        getline(&line, &len, f); // reward rate
         accounts[i].reward_rate = strtod(strip(line), NULL);
 
         accounts[i].transaction_tracter = 0;

@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 600
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +8,10 @@
 #include "utils.h"
 #include <unistd.h>
 #include "worker_thread.h"
+#include "bank_thread.h"
+#include <pthread.h>
+
+pthread_t bank_thread;
 
 int main(int argc, char **argv) {
     FILE *f;
@@ -36,17 +42,17 @@ int main(int argc, char **argv) {
     free(line);
 
     /*WORKER THREADS*/
-    WorkerThread *wts = init_worker_threads(tq, accounts, num_accounts);
+    init_worker_threads(tq, accounts, num_accounts);
 
-    free_transactions_queue(tq);
-
-    /*REWARD*/
-    issue_reward(accounts, num_accounts);
+    /*BANK THREAD*/
+    init_bank_thread(accounts, num_accounts);
 
     /*THE END*/
     printf("\n");
 
     view_accounts(accounts, num_accounts);
+
+    free_transactions_queue(tq);
 
     fclose(f);
 

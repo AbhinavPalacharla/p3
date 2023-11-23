@@ -2,6 +2,8 @@
 #define UTILS_H_
 
 #include <string.h>
+#include <pthread.h>
+#include "account.h"
 
 #define true 1
 #define false 0
