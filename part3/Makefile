@@ -25,4 +25,4 @@ utils.o: utils.c
 	$(CC) $(CFLAGS) -c utils.c
 
 clean:
-	rm -f *.o part3
+	rm -f *.o part3 act_*

@@ -162,12 +162,12 @@ Transaction *read_transaction(char *line)
 }
 
 
-void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
+int handle_transaction(Transaction *t, account *accounts, int num_accounts) {
     int account_index = authenticate_account(t->account_number, t->password, accounts, num_accounts);
 
     if(account_index == -1) {
-        printf("ERROR: Invalid account number or password\n");
-        return;
+        printf("ERROR: Failed to Authenicate. Invalid account number or password\n");
+        return -1;
     }
 
     if(t->type == DEPOSIT) {
@@ -191,7 +191,7 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
 
         if(dest == -1) {
             printf("ERROR: Invalid destination account number\n");
-            return;
+            return -1;
         }
 
         pthread_mutex_lock(&accounts[account_index].ac_lock);
@@ -213,5 +213,9 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
         printf("BALANCE: %f\n", accounts[account_index].balance);
 
         pthread_mutex_unlock(&accounts[account_index].ac_lock);
+
+        return -1;
     }
+
+    return 0;
 }

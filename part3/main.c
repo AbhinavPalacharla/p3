@@ -11,15 +11,35 @@
 #include "bank_thread.h"
 #include <pthread.h>
 
-pthread_t bank_thread;
+pthread_barrier_t barrier;
+int num_transactions_processed = 0;
+pthread_mutex_t num_transactions_processed_mutex;
+pthread_cond_t num_transactions_processed_cond;
+
+int wakeup_bank_thread = 0;
+pthread_mutex_t wakeup_bank_thread_mutex;
+pthread_cond_t wakeup_bank_thread_cond;
+
+int wakeup_worker_threads = 0;
+pthread_mutex_t wakeup_worker_threads_mutex;
+pthread_cond_t wakeup_worker_threads_cond;
 
 int main(int argc, char **argv) {
+    pthread_barrier_init(&barrier, NULL, THREAD_POOL_SIZE);
+    pthread_mutex_init(&num_transactions_processed_mutex, NULL);
+    pthread_cond_init(&num_transactions_processed_cond, NULL);
+
+    pthread_mutex_init(&wakeup_bank_thread_mutex, NULL);
+    // pthread_mutex_lock(&wakeup_bank_thread_mutex);
+    pthread_cond_init(&wakeup_bank_thread_cond, NULL);
+
+    pthread_mutex_init(&wakeup_worker_threads_mutex, NULL);
+    // pthread_mutex_lock(&wakeup_worker_threads_mutex);
+    pthread_cond_init(&wakeup_worker_threads_cond, NULL);
+
+
     FILE *f;
-    
-    if((f = fopen(argv[1], "r")) == NULL) {
-        printf("Error opening file\n");
-        exit(1);
-    }
+    if((f = fopen(argv[1], "r")) == NULL) { printf("Error opening file\n"); exit(1); }
 
     /*ACCOUNTS*/
     int num_accounts = read_num_accounts(f);
@@ -41,11 +61,17 @@ int main(int argc, char **argv) {
 
     free(line);
 
-    /*WORKER THREADS*/
-    init_worker_threads(tq, accounts, num_accounts);
-
     /*BANK THREAD*/
-    init_bank_thread(accounts, num_accounts);
+    pthread_t bank_thread = init_bank_thread(accounts, num_accounts);
+
+    /*WORKER THREADS*/
+    WorkerThread *wts = init_worker_threads(tq, accounts, num_accounts);
+
+    join_worker_threads(wts);
+    join_bank_thread(bank_thread);
+
+    // /*BANK THREAD*/
+    // init_bank_thread(accounts, num_accounts);
 
     /*THE END*/
     printf("\n");

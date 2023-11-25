@@ -11,5 +11,6 @@ typedef struct _WorkerThread
 } WorkerThread;
 
 WorkerThread *init_worker_threads(TransactionQueue *tq, account *accounts, int num_accounts);
+void join_worker_threads(WorkerThread *wts);
 
 #endif

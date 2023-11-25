@@ -37,7 +37,7 @@ void view_transaction_queue(TransactionQueue *tq);
 
 Transaction *read_transaction(char *line);
 
-void handle_transaction(Transaction *t, account *accounts, int num_accounts);
+int handle_transaction(Transaction *t, account *accounts, int num_accounts);
 
 void free_transactions_queue(TransactionQueue *tq);
 
