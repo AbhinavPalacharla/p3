@@ -32,6 +32,9 @@ extern pthread_cond_t wakeup_worker_threads_cond;
 extern pthread_mutex_t threads_running_mutex;
 extern int num_threads_with_work;
 
+extern pthread_mutex_t threads_waiting_for_bcast_mutex;
+extern int num_threads_waiting_for_bcast;
+
 void *thread_handler(void *arg) {
     ThreadHandlerArgs *args = (ThreadHandlerArgs *) arg;
     int done = 0;
@@ -56,7 +59,7 @@ void *thread_handler(void *arg) {
                 //signal bank thread to wakeup
                 if(args->id == 0) {
                     pthread_mutex_lock(&wakeup_bank_thread_mutex);
-
+                        printf("T# %d SIGNALING BANK\n", args->id);
                         pthread_cond_signal(&wakeup_bank_thread_cond);
 
                     pthread_mutex_unlock(&wakeup_bank_thread_mutex);
@@ -67,7 +70,15 @@ void *thread_handler(void *arg) {
 
                     printf("T# %d WAITING FOR WAKEUP\n", args->id);
 
+                    pthread_mutex_lock(&threads_waiting_for_bcast_mutex);
+                        num_threads_waiting_for_bcast++;
+                    pthread_mutex_unlock(&threads_waiting_for_bcast_mutex);
+
                     pthread_cond_wait(&wakeup_worker_threads_cond, &wakeup_worker_threads_mutex);
+
+                    pthread_mutex_lock(&threads_waiting_for_bcast_mutex);
+                        num_threads_waiting_for_bcast--;
+                    pthread_mutex_unlock(&threads_waiting_for_bcast_mutex);
 
                 pthread_mutex_unlock(&wakeup_worker_threads_mutex);
 
@@ -79,7 +90,7 @@ void *thread_handler(void *arg) {
 
                 if(num_threads_with_work == 0) {
                     printf("T# %d EXITING\n", args->id);
-                    // return NULL;
+                    return NULL;
                 }
             }
         
@@ -102,16 +113,21 @@ void *thread_handler(void *arg) {
         Transaction *t = args->tq->dequeue(args->tq);
 
         if(t == NULL) { 
-            printf("T# %d FINISHED\n", args->id); 
-            done = 1;
-            num_threads_with_work--;
-            printf("NUM THREADS WORKING: %d\n", num_threads_with_work);
-            if(num_threads_with_work == 0) {
-                printf("ALL THREADS DONE\n");
-                // printf("ALL THREADS DONE DOING WHILE(1)\n");
-                // sleep(10);
-                // while(1);
+            if(!done) {
+                printf("T# %d FINISHED\n", args->id); 
+                done = 1;
+                
+                pthread_mutex_lock(&threads_running_mutex);
+                    num_threads_with_work--;
+                pthread_mutex_unlock(&threads_running_mutex);
+                
+                printf("NUM THREADS WORKING: %d\n", num_threads_with_work);
+                
+                if(num_threads_with_work == 0) {
+                    printf("ALL THREADS DONE\n");
+                }
             }
+            
             // while(1);
 
                 // if(!done) {
