@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "transaction.h"
 #include "account.h"
+#include <time.h>
 
 void enqueue(TransactionQueue *self, Transaction *t)
 {
@@ -163,6 +164,14 @@ Transaction *read_transaction(char *line)
 
 
 int handle_transaction(Transaction *t, account *accounts, int num_accounts) {
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 100000;
+    // ts.tv_nsec = 5000000;
+
+
+    nanosleep(&ts, NULL);
+    
     int account_index = authenticate_account(t->account_number, t->password, accounts, num_accounts);
 
     if(account_index == -1) {
@@ -185,7 +194,7 @@ int handle_transaction(Transaction *t, account *accounts, int num_accounts) {
 
         pthread_mutex_unlock(&accounts[account_index].ac_lock);
     } else if(t->type == TRANSFER) {
-        return 0;
+        // return 0;
 
         int dest = find_account(t->destination_account, accounts, num_accounts);
 

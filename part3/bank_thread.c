@@ -4,6 +4,7 @@
 #include <time.h>
 
 extern int num_transactions_processed;
+extern pthread_mutex_t num_transactions_processed_mutex;
 
 //bank thread sync vars
 extern pthread_mutex_t wakeup_bank_thread_mutex;
@@ -25,25 +26,39 @@ void *bank_thread_handler(void *arg) {
         //listen for wakeup
         pthread_mutex_lock(&wakeup_bank_thread_mutex);
 
+            printf("BANK THREAD WAITING FOR WAKEUP\n");
             pthread_cond_wait(&wakeup_bank_thread_cond, &wakeup_bank_thread_mutex);
-
-            issue_reward(args->accounts, args->num_accounts);
-
-            view_accounts(args->accounts, args->num_accounts);
-
-            num_transactions_processed = 0;
+            printf("BANK THREAD WOKEN UP\n");
 
         pthread_mutex_unlock(&wakeup_bank_thread_mutex);
+        
+
+        printf("BANK THREAD ISSUING REWARD\n");
+        issue_reward(args->accounts, args->num_accounts);
+        printf("BANK THREAD ISSUED REWARDS\n");
+        // view_accounts(args->accounts, args->num_accounts);
+
+        printf("BANK THREAD RESETING NUM TRANSACTIONS PROCESSED\n");
+        pthread_mutex_lock(&num_transactions_processed_mutex);
+
+            num_transactions_processed = 0;
+            printf("BANK THREAD RESET NUM_TRANSACTIONS_PROCESSED = %d\n", num_transactions_processed);
+
+        pthread_mutex_unlock(&num_transactions_processed_mutex);            
+
+        // pthread_mutex_unlock(&wakeup_bank_thread_mutex);
 
         //wake up worker threads
         pthread_mutex_lock(&wakeup_worker_threads_mutex);
 
+            printf("BANK THREAD WAKING UP WORKER THREADS\n");
             pthread_cond_broadcast(&wakeup_worker_threads_cond);
 
         pthread_mutex_unlock(&wakeup_worker_threads_mutex);
 
         if(num_threads_with_work == 0) {
-            return NULL;
+            printf("NO WORKER THREADS RUNNING, EXITING BANK THREAD\n");
+            // return NULL;
         }
     }
 

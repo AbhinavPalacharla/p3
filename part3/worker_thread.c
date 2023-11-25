@@ -1,7 +1,10 @@
 #define _XOPEN_SOURCE 600
+#define _GNU_SOURCE
 #include "worker_thread.h"
 #include "utils.h"
 #include <pthread.h>
+#include <time.h>
+#include <unistd.h>
 
 typedef struct _ThreadHandlerArgs {
     int id;
@@ -42,28 +45,42 @@ void *thread_handler(void *arg) {
 
 
     while(true) {        
-        pthread_mutex_unlock(&num_transactions_processed_mutex);
-
+        pthread_mutex_lock(&num_transactions_processed_mutex);
+            // if((num_transactions_processed >= REWARD_TRANSACTION_THRESHOLD)) {
             if((num_transactions_processed >= REWARD_TRANSACTION_THRESHOLD) || done) {
+                pthread_mutex_unlock(&num_transactions_processed_mutex);
+                printf("T# %d WAITING AT BARRIER\n", args->id);
                 pthread_barrier_wait(&barrier); //wait for all threads to finish their handling
+                printf("T# %d PASSED BARRIER\n", args->id);
 
                 //signal bank thread to wakeup
-                pthread_mutex_lock(&wakeup_bank_thread_mutex);
+                if(args->id == 0) {
+                    pthread_mutex_lock(&wakeup_bank_thread_mutex);
 
-                    pthread_cond_signal(&wakeup_bank_thread_cond);
+                        pthread_cond_signal(&wakeup_bank_thread_cond);
 
-                pthread_mutex_unlock(&wakeup_bank_thread_mutex);
+                    pthread_mutex_unlock(&wakeup_bank_thread_mutex);
+                }
 
                 //wait for bank thread to finish and listen for wakeup signal
                 pthread_mutex_lock(&wakeup_worker_threads_mutex);
 
+                    printf("T# %d WAITING FOR WAKEUP\n", args->id);
+
                     pthread_cond_wait(&wakeup_worker_threads_cond, &wakeup_worker_threads_mutex);
 
-                    if(num_threads_with_work == 0) {
-                        return NULL;
-                    }
-
                 pthread_mutex_unlock(&wakeup_worker_threads_mutex);
+
+                printf("T# %d WOKEN UP BY BANK\n", args->id);
+
+                pthread_barrier_wait(&barrier); //wait for all threads to finish their handling
+
+                printf("T# %d PASSED BANK BARRIER\n", args->id);
+
+                if(num_threads_with_work == 0) {
+                    printf("T# %d EXITING\n", args->id);
+                    // return NULL;
+                }
             }
         
             if(!done) {
@@ -77,25 +94,38 @@ void *thread_handler(void *arg) {
 
             printf("TRANS#: %d | T# %d RUNNING PROC | VALID#: %d, INVALID#: %d, TOTAL: %d\n", num_transactions_processed, args->id, num_valid_trans, num_invalid_trans, num_total_trans);
 
+            // printf("TRANS#: %d | T# %d RUNNING PROC | TOTAL: %d\n", num_transactions_processed, args->id, num_total_trans);
+
+
         pthread_mutex_unlock(&num_transactions_processed_mutex);
 
         Transaction *t = args->tq->dequeue(args->tq);
 
         if(t == NULL) { 
-            // printf("T# %d FINISHED\n", args->id); 
+            printf("T# %d FINISHED\n", args->id); 
+            done = 1;
+            num_threads_with_work--;
+            printf("NUM THREADS WORKING: %d\n", num_threads_with_work);
+            if(num_threads_with_work == 0) {
+                printf("ALL THREADS DONE\n");
+                // printf("ALL THREADS DONE DOING WHILE(1)\n");
+                // sleep(10);
+                // while(1);
+            }
+            // while(1);
 
-                if(!done) {
+                // if(!done) {
                     
-                    printf("T# %d FINISHED\n", args->id); 
+                //     printf("T# %d FINISHED\n", args->id); 
 
-                    pthread_mutex_lock(&threads_running_mutex);
+                //     pthread_mutex_lock(&threads_running_mutex);
 
-                        num_threads_with_work--;
+                //         num_threads_with_work--;
 
-                    pthread_mutex_unlock(&threads_running_mutex);
+                //     pthread_mutex_unlock(&threads_running_mutex);
 
-                    done = 1;
-                }
+                //     done = 1;
+                // }
 
         } else if(handle_transaction(t, args->accounts, args->num_accounts) == -1) {
             pthread_mutex_lock(&num_transactions_processed_mutex);
@@ -114,7 +144,9 @@ void *thread_handler(void *arg) {
 WorkerThread *init_worker_threads(TransactionQueue *tq, account *accounts, int num_accounts) {
     WorkerThread *wts = (WorkerThread *) malloc(sizeof(WorkerThread) * THREAD_POOL_SIZE);
 
-    int num_thread_transactions = tq->size / THREAD_POOL_SIZE;
+    // int num_thread_transactions = tq->size / THREAD_POOL_SIZE;
+    int num_thread_transactions = 100 / THREAD_POOL_SIZE;
+
 
     printf("NUM THREAD TRANSACTIONS: %d\n", num_thread_transactions);
 

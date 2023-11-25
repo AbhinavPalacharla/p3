@@ -73,13 +73,15 @@ int main(int argc, char **argv) {
     join_worker_threads(wts);
     join_bank_thread(bank_thread);
 
+    printf("FINISHING MAIN\n");
+
     // /*BANK THREAD*/
     // init_bank_thread(accounts, num_accounts);
 
     /*THE END*/
-    printf("\n");
+    // printf("\n");
 
-    view_accounts(accounts, num_accounts);
+    // view_accounts(accounts, num_accounts);
 
     free_transactions_queue(tq);
 
