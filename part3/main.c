@@ -24,6 +24,9 @@ int wakeup_worker_threads = 0;
 pthread_mutex_t wakeup_worker_threads_mutex;
 pthread_cond_t wakeup_worker_threads_cond;
 
+pthread_mutex_t threads_running_mutex;
+int num_threads_with_work = THREAD_POOL_SIZE;
+
 int main(int argc, char **argv) {
     pthread_barrier_init(&barrier, NULL, THREAD_POOL_SIZE);
     pthread_mutex_init(&num_transactions_processed_mutex, NULL);

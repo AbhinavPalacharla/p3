@@ -3,7 +3,7 @@
 #include "utils.h"
 #include <pthread.h>
 
-extern int threads_running;
+extern int num_threads_with_work;
 extern pthread_mutex_t threads_running_mutex;
 
 extern pthread_barrier_t barrier;
@@ -93,8 +93,8 @@ void *thread_handler(void *arg) {
             printf("T# %d FINISHED", args->id); 
 
             pthread_mutex_lock(&threads_running_mutex);
-            threads_running--;
-            printf("THREADS RUNNING: %d\n", threads_running);
+            num_threads_with_work--;
+            printf("THREADS RUNNING: %d\n", num_threads_with_work);
             pthread_mutex_unlock(&threads_running_mutex);    
         }
 

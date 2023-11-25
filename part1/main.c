@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,7 +7,11 @@
 #include "transaction.h"
 #include "utils.h"
 
+#define NUM_TRANSACTIONS 120000
+
 int main(int argc, char **argv) {
+    int invalid_transactions = 0;
+
     FILE *f;
     
     if((f = fopen(argv[1], "r")) == NULL) {
@@ -32,7 +38,8 @@ int main(int argc, char **argv) {
     while((read = getline(&line, &len, f)) != -1) {
         Transaction *t = read_transaction(line);
         view_transaction(t);
-        handle_transaction(t, accounts, num_accounts);
+        // handle_transaction(t, accounts, num_accounts);
+        if(handle_transaction(t, accounts, num_accounts) != 0) { invalid_transactions++; }
     }
 
     // issue_reward(accounts, num_accounts);
@@ -43,6 +50,9 @@ int main(int argc, char **argv) {
 
     free(line);
     free_accounts(accounts, num_accounts);
+
+    printf("INVALID: %d\n", invalid_transactions);
+    printf("VALID: %d\n", NUM_TRANSACTIONS - invalid_transactions);
 
     return 0;
 }

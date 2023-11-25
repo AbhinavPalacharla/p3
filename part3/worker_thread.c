@@ -26,20 +26,25 @@ extern pthread_mutex_t wakeup_worker_threads_mutex;
 extern pthread_cond_t wakeup_worker_threads_cond;
 
 //num threads running
-pthread_mutex_t threads_running_mutex;
-int threads_running = THREAD_POOL_SIZE;
+extern pthread_mutex_t threads_running_mutex;
+extern int num_threads_with_work;
 
 void *thread_handler(void *arg) {
     ThreadHandlerArgs *args = (ThreadHandlerArgs *) arg;
+    int done = 0;
+    int num_valid_trans = 0;
+    int num_invalid_trans = 0;
+    int num_total_trans = 0;
 
     printf("Thread %d Waiting...\n", args->id);
     pthread_barrier_wait(&barrier);
     printf("Thread %d Running...\n", args->id);
 
-    while(true) {
+
+    while(true) {        
         pthread_mutex_unlock(&num_transactions_processed_mutex);
 
-            if(num_transactions_processed >= REWARD_TRANSACTION_THRESHOLD) {
+            if((num_transactions_processed >= REWARD_TRANSACTION_THRESHOLD) || done) {
                 pthread_barrier_wait(&barrier); //wait for all threads to finish their handling
 
                 //signal bank thread to wakeup
@@ -53,40 +58,51 @@ void *thread_handler(void *arg) {
                 pthread_mutex_lock(&wakeup_worker_threads_mutex);
 
                     pthread_cond_wait(&wakeup_worker_threads_cond, &wakeup_worker_threads_mutex);
-                    // pthread_barrier_wait(&barrier);
-                    // printf("T# %d WOKE UP\n", args->id);
+
+                    if(num_threads_with_work == 0) {
+                        return NULL;
+                    }
 
                 pthread_mutex_unlock(&wakeup_worker_threads_mutex);
             }
+        
+            if(!done) {
+                num_transactions_processed++;
+                num_valid_trans += 1;
+                num_total_trans += 1;
+            }
+            // num_transactions_processed++;
+            // num_valid_trans += 1;
+            // num_total_trans += 1;
 
-            num_transactions_processed++;
-
-            printf("NUM TRANS PROC: %d | T# %d RUNNING PROC\n", num_transactions_processed, args->id);
+            printf("TRANS#: %d | T# %d RUNNING PROC | VALID#: %d, INVALID#: %d, TOTAL: %d\n", num_transactions_processed, args->id, num_valid_trans, num_invalid_trans, num_total_trans);
 
         pthread_mutex_unlock(&num_transactions_processed_mutex);
 
         Transaction *t = args->tq->dequeue(args->tq);
 
         if(t == NULL) { 
-            printf("T# %d FINISHED\n", args->id); 
+            // printf("T# %d FINISHED\n", args->id); 
 
-            pthread_mutex_lock(&threads_running_mutex);
-
-                if(threads_running == 0) {
-                    printf("T# %d EXITED. Threads_running: %d\n", args->id, threads_running); 
+                if(!done) {
                     
+                    printf("T# %d FINISHED\n", args->id); 
+
+                    pthread_mutex_lock(&threads_running_mutex);
+
+                        num_threads_with_work--;
+
                     pthread_mutex_unlock(&threads_running_mutex);
 
-                    return NULL;
+                    done = 1;
                 }
-
-                threads_running--;
-            pthread_mutex_unlock(&threads_running_mutex);
 
         } else if(handle_transaction(t, args->accounts, args->num_accounts) == -1) {
             pthread_mutex_lock(&num_transactions_processed_mutex);
             
                 num_transactions_processed--;
+                num_valid_trans -= 1;
+                num_invalid_trans += 1;
             
             pthread_mutex_unlock(&num_transactions_processed_mutex);
         }
@@ -100,6 +116,8 @@ WorkerThread *init_worker_threads(TransactionQueue *tq, account *accounts, int n
 
     int num_thread_transactions = tq->size / THREAD_POOL_SIZE;
 
+    printf("NUM THREAD TRANSACTIONS: %d\n", num_thread_transactions);
+
     for(int i = 0; i < THREAD_POOL_SIZE; i++) {
         wts[i].tq = init_transaction_queue();
     }
@@ -110,6 +128,7 @@ WorkerThread *init_worker_threads(TransactionQueue *tq, account *accounts, int n
             t->next = NULL;
             wts[i].tq->enqueue(wts[i].tq, t);
         }
+        printf("Size of T# %d: %d\n", i, wts[i].tq->size);
     }
 
     //create threads

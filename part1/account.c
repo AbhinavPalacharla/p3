@@ -20,22 +20,21 @@ void read_accounts(account *accounts, FILE *f, int num_accounts)
 {
     size_t len = 128;
     char *line = malloc(sizeof(char) * len);
-    ssize_t read;
 
     for (int i = 0; i < num_accounts; i++)
     {
         getline(&line, &len, f); // skip index line
 
-        read = getline(&line, &len, f); // account number
+        getline(&line, &len, f); // account number
         strcpy(accounts[i].account_number, strip(line));
 
-        read = getline(&line, &len, f); // account password
+        getline(&line, &len, f); // account password
         strcpy(accounts[i].password, strip(line));
 
-        read = getline(&line, &len, f); // initial balance
+        getline(&line, &len, f); // initial balance
         accounts[i].balance = atof(strip(line));
 
-        read = getline(&line, &len, f); // reward rate
+        getline(&line, &len, f); // reward rate
         accounts[i].reward_rate = strtod(strip(line), NULL);
 
         accounts[i].transaction_tracter = 0;

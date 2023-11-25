@@ -185,7 +185,7 @@ int handle_transaction(Transaction *t, account *accounts, int num_accounts) {
 
         pthread_mutex_unlock(&accounts[account_index].ac_lock);
     } else if(t->type == TRANSFER) {
-        // return;
+        return 0;
 
         int dest = find_account(t->destination_account, accounts, num_accounts);
 

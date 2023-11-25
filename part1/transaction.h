@@ -24,6 +24,6 @@ void view_transaction(Transaction *t);
 
 Transaction *read_transaction(char *line);
 
-void handle_transaction(Transaction *t, account *accounts, int num_accounts);
+int handle_transaction(Transaction *t, account *accounts, int num_accounts);
 
 #endif

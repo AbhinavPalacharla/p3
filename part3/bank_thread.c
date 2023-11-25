@@ -13,6 +13,11 @@ extern pthread_cond_t wakeup_bank_thread_cond;
 extern pthread_mutex_t wakeup_worker_threads_mutex;
 extern pthread_cond_t wakeup_worker_threads_cond;
 
+extern int num_threads_with_work;
+extern pthread_mutex_t threads_running_mutex;
+
+extern int num_threads_with_work;
+
 void *bank_thread_handler(void *arg) {
     BankThreadHandlerArgs *args = (BankThreadHandlerArgs *) arg;
 
@@ -36,6 +41,10 @@ void *bank_thread_handler(void *arg) {
             pthread_cond_broadcast(&wakeup_worker_threads_cond);
 
         pthread_mutex_unlock(&wakeup_worker_threads_mutex);
+
+        if(num_threads_with_work == 0) {
+            return NULL;
+        }
     }
 
     return NULL;

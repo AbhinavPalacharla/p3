@@ -92,12 +92,12 @@ Transaction *read_transaction(char *line)
 }
 
 
-void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
+int handle_transaction(Transaction *t, account *accounts, int num_accounts) {
     int account_index = authenticate_account(t->account_number, t->password, accounts, num_accounts);
 
     if(account_index == -1) {
         printf("ERROR: Invalid account number or password\n");
-        return;
+        return -1;
     }
 
     if(t->type == DEPOSIT) {
@@ -112,7 +112,7 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
 
         if(dest == -1) {
             printf("ERROR: Invalid destination account number\n");
-            return;
+            return -1;
         }
 
         accounts[account_index].balance -= t->amount;
@@ -120,5 +120,8 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
         accounts[dest].balance += t->amount;
     } else if(t->type == CHECK_BALANCE) {
         printf("BALANCE: %f\n", accounts[account_index].balance);
+        return 1;
     }
+
+    return 0;
 }
