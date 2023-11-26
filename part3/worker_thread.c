@@ -15,6 +15,7 @@ typedef struct _ThreadHandlerArgs {
 } ThreadHandlerArgs;
 
 extern pthread_barrier_t barrier;
+extern pthread_barrier_t exit_barrier;
 
 //transaction processing sync vars
 extern int num_transactions_processed;
@@ -95,6 +96,11 @@ void *thread_handler(void *arg) {
                     printf("T# %d EXITING | CT %d\n", args->id, done_counter);
                     done_counter++;
                     // exit(1);
+                    printf("T# %d WAITING BEFORE EXIT BARRIER\n", args->id);
+                    pthread_barrier_wait(&exit_barrier);
+                    printf("T# %d WAKEUP FROM EXIT BARRIER\n", args->id);
+                    // pthread_exit(0);
+                    return NULL;
                     // return NULL;
                 }
             }
