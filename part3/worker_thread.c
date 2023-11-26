@@ -42,16 +42,17 @@ void *thread_handler(void *arg) {
     int num_valid_trans = 0;
     int num_invalid_trans = 0;
     int num_total_trans = 0;
+    int done_counter = 0;
 
     printf("Thread %d Waiting...\n", args->id);
     pthread_barrier_wait(&barrier);
     printf("Thread %d Running...\n", args->id);
-
-
-    while(true) {        
+    while(true) {
+        int num_trans_unlock_done_flag = 0;
         pthread_mutex_lock(&num_transactions_processed_mutex);
             // if((num_transactions_processed >= REWARD_TRANSACTION_THRESHOLD)) {
             if((num_transactions_processed >= REWARD_TRANSACTION_THRESHOLD) || done) {
+                num_trans_unlock_done_flag = 1;
                 pthread_mutex_unlock(&num_transactions_processed_mutex);
                 printf("T# %d WAITING AT BARRIER\n", args->id);
                 pthread_barrier_wait(&barrier); //wait for all threads to finish their handling
@@ -90,8 +91,10 @@ void *thread_handler(void *arg) {
                 printf("T# %d PASSED BANK BARRIER\n", args->id);
 
                 if(num_threads_with_work == 0) {
-                    printf("T# %d EXITING\n", args->id);
-                    exit(1);
+                    // view_accounts(args->accounts, args->num_accounts);
+                    printf("T# %d EXITING | CT %d\n", args->id, done_counter);
+                    done_counter++;
+                    // exit(1);
                     // return NULL;
                 }
             }
@@ -109,8 +112,7 @@ void *thread_handler(void *arg) {
 
             // printf("TRANS#: %d | T# %d RUNNING PROC | TOTAL: %d\n", num_transactions_processed, args->id, num_total_trans);
 
-
-        pthread_mutex_unlock(&num_transactions_processed_mutex);
+        if(!num_trans_unlock_done_flag) { pthread_mutex_unlock(&num_transactions_processed_mutex); }
 
         Transaction *t = args->tq->dequeue(args->tq);
 
@@ -156,7 +158,7 @@ void *thread_handler(void *arg) {
                 pthread_mutex_unlock(&num_transactions_processed_mutex);
             }
             
-            sched_yield();
+            // sched_yield();
         }
         
          

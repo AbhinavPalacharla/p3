@@ -178,6 +178,7 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
         
         pthread_mutex_unlock(&accounts[account_index].ac_lock);
     } else if(t->type == WITHDRAW) {
+        return;
         pthread_mutex_lock(&accounts[account_index].ac_lock);
 
         accounts[account_index].balance -= t->amount;
@@ -185,7 +186,7 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
 
         pthread_mutex_unlock(&accounts[account_index].ac_lock);
     } else if(t->type == TRANSFER) {
-        // return;
+        return;
 
         int dest = find_account(t->destination_account, accounts, num_accounts);
 
@@ -208,6 +209,7 @@ void handle_transaction(Transaction *t, account *accounts, int num_accounts) {
 
         pthread_mutex_unlock(&accounts[dest].ac_lock);
     } else if(t->type == CHECK_BALANCE) {
+        // return;
         pthread_mutex_lock(&accounts[account_index].ac_lock);
 
         printf("BALANCE: %f\n", accounts[account_index].balance);

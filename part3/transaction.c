@@ -183,9 +183,11 @@ int handle_transaction(Transaction *t, account *accounts, int num_accounts) {
         
         accounts[account_index].balance += t->amount;
         accounts[account_index].transaction_tracter += t->amount;
-        
+        printf("TRACTER UPDATE | ACT #%d | AMT: %lf | TRAC: %lf\n", account_index, t->amount, accounts[account_index].transaction_tracter);
+
         pthread_mutex_unlock(&accounts[account_index].ac_lock);
     } else if(t->type == WITHDRAW) {
+        // return 0;
         pthread_mutex_lock(&accounts[account_index].ac_lock);
 
         accounts[account_index].balance -= t->amount;
