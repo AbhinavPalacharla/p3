@@ -16,7 +16,7 @@ void view_accounts(account *accounts, int num_accounts)
         FILE *fp = fopen(fpath, "ab+");
         
         char *act_info;
-        asprintf(&act_info, "[%d/%d]\t (#) %s\t (PASSWD) %s\t (BAL) %.2f\t RR %lf \n", i + 1, num_accounts, accounts[i].account_number, accounts[i].password, accounts[i].balance, accounts[i].reward_rate);
+        asprintf(&act_info, "[%d/%d]\t (#) %s\t (PASSWD) %s\t (BAL) %.2f\t RR %lf\t TRAC %lf \n", i + 1, num_accounts, accounts[i].account_number, accounts[i].password, accounts[i].balance, accounts[i].reward_rate, accounts[i].transaction_tracter);
 
         fwrite(act_info, sizeof(char), strlen(act_info), fp);
         printf("%s", act_info);
@@ -121,6 +121,7 @@ void issue_reward(account *accounts, int num_accounts)
 {
     for (int i = 0; i < num_accounts; i++)
     {
-        accounts[i].balance += accounts[i].transaction_tracter * accounts[i].reward_rate;
+        // accounts[i].balance += accounts[i].transaction_tracter * accounts[i].reward_rate;
+        // accounts[i].transaction_tracter = 0;
     }
 }

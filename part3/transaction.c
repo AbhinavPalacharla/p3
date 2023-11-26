@@ -164,13 +164,12 @@ Transaction *read_transaction(char *line)
 
 
 int handle_transaction(Transaction *t, account *accounts, int num_accounts) {
-    struct timespec ts;
-    ts.tv_sec = 0;
-    ts.tv_nsec = 100000;
-    // ts.tv_nsec = 5000000;
+    // struct timespec ts;
+    // ts.tv_sec = 0;
+    // ts.tv_nsec = 100000;
 
 
-    nanosleep(&ts, NULL);
+    // nanosleep(&ts, NULL);
     
     int account_index = authenticate_account(t->account_number, t->password, accounts, num_accounts);
 
@@ -217,11 +216,11 @@ int handle_transaction(Transaction *t, account *accounts, int num_accounts) {
 
         pthread_mutex_unlock(&accounts[dest].ac_lock);
     } else if(t->type == CHECK_BALANCE) {
-        pthread_mutex_lock(&accounts[account_index].ac_lock);
+        // pthread_mutex_lock(&accounts[account_index].ac_lock);
 
-        printf("BALANCE: %f\n", accounts[account_index].balance);
+        // printf("BALANCE: %f\n", accounts[account_index].balance);
 
-        pthread_mutex_unlock(&accounts[account_index].ac_lock);
+        // pthread_mutex_unlock(&accounts[account_index].ac_lock);
 
         return -1;
     }

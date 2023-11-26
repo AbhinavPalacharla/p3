@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <unistd.h>
+#include <sched.h>
 
 typedef struct _ThreadHandlerArgs {
     int id;
@@ -90,7 +91,8 @@ void *thread_handler(void *arg) {
 
                 if(num_threads_with_work == 0) {
                     printf("T# %d EXITING\n", args->id);
-                    return NULL;
+                    exit(1);
+                    // return NULL;
                 }
             }
         
@@ -124,7 +126,7 @@ void *thread_handler(void *arg) {
                 printf("NUM THREADS WORKING: %d\n", num_threads_with_work);
                 
                 if(num_threads_with_work == 0) {
-                    printf("ALL THREADS DONE\n");
+                    printf("T# %d ALL THREADS DONE\n", args->id);
                 }
             }
             
@@ -143,25 +145,29 @@ void *thread_handler(void *arg) {
                 //     done = 1;
                 // }
 
-        } else if(handle_transaction(t, args->accounts, args->num_accounts) == -1) {
-            pthread_mutex_lock(&num_transactions_processed_mutex);
+        } else {
+            if(handle_transaction(t, args->accounts, args->num_accounts) == -1) {
+                pthread_mutex_lock(&num_transactions_processed_mutex);
+                
+                    num_transactions_processed--;
+                    num_valid_trans -= 1;
+                    num_invalid_trans += 1;
+                
+                pthread_mutex_unlock(&num_transactions_processed_mutex);
+            }
             
-                num_transactions_processed--;
-                num_valid_trans -= 1;
-                num_invalid_trans += 1;
-            
-            pthread_mutex_unlock(&num_transactions_processed_mutex);
+            sched_yield();
         }
+        
+         
     }
-
-    return NULL;
 }
 
 WorkerThread *init_worker_threads(TransactionQueue *tq, account *accounts, int num_accounts) {
     WorkerThread *wts = (WorkerThread *) malloc(sizeof(WorkerThread) * THREAD_POOL_SIZE);
 
-    // int num_thread_transactions = tq->size / THREAD_POOL_SIZE;
-    int num_thread_transactions = 100 / THREAD_POOL_SIZE;
+    int num_thread_transactions = tq->size / THREAD_POOL_SIZE;
+    // int num_thread_transactions = 100 / THREAD_POOL_SIZE;
 
 
     printf("NUM THREAD TRANSACTIONS: %d\n", num_thread_transactions);

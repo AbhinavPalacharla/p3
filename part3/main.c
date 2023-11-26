@@ -73,6 +73,8 @@ int main(int argc, char **argv) {
     /*WORKER THREADS*/
     WorkerThread *wts = init_worker_threads(tq, accounts, num_accounts);
 
+    printf("JOINING WORKER THREADS\n");
+    
     join_worker_threads(wts);
     join_bank_thread(bank_thread);
 
