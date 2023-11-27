@@ -43,33 +43,18 @@ void *bank_thread_handler(void *arg) {
         
         view_accounts(args->accounts, args->num_accounts);
 
-        printf("BANK THREAD RESETING NUM TRANSACTIONS PROCESSED\n");
-        pthread_mutex_lock(&num_transactions_processed_mutex);
-
-            num_transactions_processed = 0;
-            printf("BANK THREAD RESET NUM_TRANSACTIONS_PROCESSED = %d\n", num_transactions_processed);
-
-        pthread_mutex_unlock(&num_transactions_processed_mutex);            
-
-        // pthread_mutex_unlock(&wakeup_bank_thread_mutex);
-
         //wake up worker threads
         pthread_mutex_lock(&wakeup_worker_threads_mutex);
 
-            printf("BANK THREAD CHECKING NUM THREAD BCAST\n");
-            // sleep(2);
+            printf("BANK THREAD WAKING UP WORKER THREAD 0\n");
 
-            while(num_threads_waiting_for_bcast != THREAD_POOL_SIZE);
-
-            printf("BANK THREAD WAKING UP WORKER THREADS\n");
-
-            pthread_cond_broadcast(&wakeup_worker_threads_cond);
+            pthread_cond_signal(&wakeup_worker_threads_cond);
 
         pthread_mutex_unlock(&wakeup_worker_threads_mutex);
 
         if(num_threads_with_work == 0) {
             printf("NO WORKER THREADS RUNNING, EXITING BANK THREAD\n");
-            // return NULL;
+            return NULL;
         }
     }
 }

@@ -16,6 +16,9 @@ int num_transactions_processed = 0;
 pthread_mutex_t num_transactions_processed_mutex;
 pthread_cond_t num_transactions_processed_cond;
 
+pthread_barrier_t barrier1;
+pthread_barrier_t barrier2;
+pthread_barrier_t bank_barrier;
 pthread_barrier_t exit_barrier;
 
 int wakeup_bank_thread = 0;
@@ -32,9 +35,14 @@ int num_threads_with_work = THREAD_POOL_SIZE;
 pthread_mutex_t threads_waiting_for_bcast_mutex;
 int num_threads_waiting_for_bcast = 0;
 
+int thread_exit_flag = 0;
+
 int main(int argc, char **argv) {
     pthread_barrier_init(&barrier, NULL, THREAD_POOL_SIZE);
-    pthread_barrier_init(&exit_barrier, NULL, THREAD_POOL_SIZE + 1);
+    pthread_barrier_init(&barrier1, NULL, THREAD_POOL_SIZE);
+    pthread_barrier_init(&barrier2, NULL, THREAD_POOL_SIZE);
+    pthread_barrier_init(&bank_barrier, NULL, THREAD_POOL_SIZE);
+    pthread_barrier_init(&exit_barrier, NULL, THREAD_POOL_SIZE);
 
     pthread_mutex_init(&num_transactions_processed_mutex, NULL);
     pthread_cond_init(&num_transactions_processed_cond, NULL);
