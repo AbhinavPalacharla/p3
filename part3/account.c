@@ -121,7 +121,7 @@ void issue_reward(account *accounts, int num_accounts)
 {
     for (int i = 0; i < num_accounts; i++)
     {
-        // accounts[i].balance += accounts[i].transaction_tracter * accounts[i].reward_rate;
-        // accounts[i].transaction_tracter = 0;
+        accounts[i].balance += accounts[i].transaction_tracter * accounts[i].reward_rate;
+        accounts[i].transaction_tracter = 0;
     }
 }

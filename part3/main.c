@@ -92,14 +92,6 @@ int main(int argc, char **argv) {
 
     printf("FINISHING MAIN\n");
 
-    // /*BANK THREAD*/
-    // init_bank_thread(accounts, num_accounts);
-
-    /*THE END*/
-    // printf("\n");
-
-    // view_accounts(accounts, num_accounts);
-
     free_transactions_queue(tq);
 
     fclose(f);

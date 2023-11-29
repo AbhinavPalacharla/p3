@@ -115,7 +115,7 @@ void *thread_handler(void *arg) {
                         t = args->tq->dequeue(args->tq);
                     }
                     
-                    printf(">>TRANS#: %d | T# %d RUNNING PROC | VALID#: %d, INVALID#: %d, TOTAL: %d\n", num_transactions_processed, args->id, num_valid_trans, num_invalid_trans, num_total_trans);
+                    // printf(">>TRANS#: %d | T# %d RUNNING PROC | VALID#: %d, INVALID#: %d, TOTAL: %d\n", num_transactions_processed, args->id, num_valid_trans, num_invalid_trans, num_total_trans);
                 }
         } else {
         /*

@@ -52,8 +52,6 @@ int main(int argc, char **argv) {
 
     view_accounts(accounts, num_accounts);
 
-    free_transactions_queue(tq);
-
     fclose(f);
 
     return 0;
