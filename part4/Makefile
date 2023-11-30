@@ -5,6 +5,7 @@ CFLAGS = -g -W -Wall -pthread -lpthread
 
 bank: bank.o account.o transaction.o utils.o worker_thread.o bank_thread.o
 	mkdir output
+	mkdir output/savings
 	$(CC) $(CFLAGS) -o bank bank.o account.o transaction.o utils.o worker_thread.o bank_thread.o -lpthread
 
 bank.o: bank.c

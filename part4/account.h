@@ -20,7 +20,11 @@ int read_num_accounts(FILE *f);
 
 void view_accounts(account *accounts, int num_accounts);
 
-void read_accounts(account *accounts, FILE *f, int num_accounts);
+void puddles_view_accounts(account *accounts, int num_accounts);
+
+void read_accounts(account *accounts, FILE *f, int num_accounts, char *mem);
+
+void puddles_read_accounts(account *accounts, char *mem, int num_accounts);
 
 void free_accounts(account *accounts, int num_accounts);
 

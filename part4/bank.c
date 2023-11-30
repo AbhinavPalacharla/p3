@@ -10,6 +10,8 @@
 #include "worker_thread.h"
 #include "bank_thread.h"
 #include <pthread.h>
+#include <signal.h>
+#include <sys/mman.h>
 
 pthread_barrier_t barrier;
 int num_transactions_processed = 0;
@@ -36,6 +38,9 @@ pthread_mutex_t threads_waiting_for_bcast_mutex;
 int num_threads_waiting_for_bcast = 0;
 
 int thread_exit_flag = 0;
+int pid;
+
+#define PAGESIZE 4096
 
 int main(int argc, char **argv) {
     pthread_barrier_init(&barrier, NULL, THREAD_POOL_SIZE);
@@ -55,54 +60,129 @@ int main(int argc, char **argv) {
     // pthread_mutex_lock(&wakeup_worker_threads_mutex);
     pthread_cond_init(&wakeup_worker_threads_cond, NULL);
 
-
     FILE *f;
     if((f = fopen(argv[1], "r")) == NULL) { printf("Error opening file\n"); exit(1); }
 
     /*ACCOUNTS*/
     int num_accounts = read_num_accounts(f);
 
+    void *shared_mem = mmap(NULL, (sizeof(account) * num_accounts), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
+    pid = fork();
+    printf("PID: %d\n", pid);
+
     account *accounts = (account *) malloc(sizeof(account) * num_accounts); //array of accounts
 
-    read_accounts(accounts, f, num_accounts); //populate accounts
+    if(pid == 0) {
 
-    // view_accounts(accounts, num_accounts);
+        sigset_t set; int sig; sigset_t set1; int sig1;
+        sigemptyset(&set);
+        sigemptyset(&set1);
 
-    /*TRANSACTIONS*/
-    TransactionQueue *tq = init_transaction_queue();
+        sigaddset(&set, SIGUSR1);
+        sigaddset(&set1, SIGCONT);
+        sigaddset(&set1, SIGUSR2);
 
-    size_t len = 128; char *line = malloc(sizeof(char) * len);  ssize_t read;
+        sigprocmask(SIG_BLOCK, &set, NULL);
+        sigprocmask(SIG_BLOCK, &set1, NULL);
 
-    while((read = getline(&line, &len, f)) != -1) {
-        tq->enqueue(tq, read_transaction(line));
+        // sigset_t set; int sig;
+        // sigemptyset(&set);
+        // sigaddset(&set, SIGUSR1);
+        // sigaddset(&set, SIGCONT);
+        printf("INIT PUDDLES\n");
+
+        sigwait(&set, &sig);
+        printf("PUDDLES READING FROM SHARED MEMORY\n");
+
+        // printf("SHARED MEMORY\n%s\n", shared_mem);
+
+        puddles_read_accounts(accounts, (char *) shared_mem, num_accounts);
+        puddles_view_accounts(accounts, num_accounts);
+
+        while(true) {
+            sigwait(&set1, &sig1);
+            if(sig1 == SIGUSR2) {
+                printf("PUDDLES DONE\n");
+
+                free_accounts(accounts, num_accounts);
+
+                free(shared_mem);
+
+                break;
+            }
+            
+            puddles_issue_reward(accounts, num_accounts);
+
+            puddles_view_accounts(accounts, num_accounts);
+            // printf("PUDDLES WOKE UP\n");
+        }
+        
+        // sleep(1);
+        // puddles_read_accounts(accounts, f, num_accounts);
+        // puddles_view_accounts(accounts, num_accounts);
+    } else {
+        read_accounts(accounts, f, num_accounts, (char *) shared_mem);
+        
+        kill(pid, SIGUSR1);
+
+        // waitpid(0, NULL, 0);
+        // return 0;
+        /*TRANSACTIONS*/
+        TransactionQueue *tq = init_transaction_queue();
+
+        size_t len = 128; char *line = malloc(sizeof(char) * len);  ssize_t read;
+
+        while((read = getline(&line, &len, f)) != -1) {
+            tq->enqueue(tq, read_transaction(line));
+        }
+
+        free(line);
+
+        /*BANK THREAD*/
+        BankThread *bt = init_bank_thread(accounts, num_accounts);
+
+        /*WORKER THREADS*/
+        WorkerThread *wts = init_worker_threads(tq, accounts, num_accounts);
+
+        // printf("JOINING WORKER THREADS\n");
+        
+        //JOIN THREADS
+        join_worker_threads(wts);
+
+        join_bank_thread(bt);
+        // wait(NULL);
+
+        free_transactions_queue(tq);
+
+        free_bank_thread(bt);
+        free_worker_threads(wts);
     }
 
-    free(line);
+    //wait for child process to finish
+    // if(pid != 0) {
+    //     waitpid(0, NULL, 0);
+    // }
 
-    /*BANK THREAD*/
-    BankThread *bt = init_bank_thread(accounts, num_accounts);
-
-    /*WORKER THREADS*/
-    WorkerThread *wts = init_worker_threads(tq, accounts, num_accounts);
-
-    // printf("JOINING WORKER THREADS\n");
     
-    //JOIN THREADS
-    join_worker_threads(wts);
 
-    join_bank_thread(bt);
+    // // THE END
+    // free_accounts(accounts, num_accounts);
 
-    // THE END
+    // free_transactions_queue(tq);
+
+    // free_bank_thread(bt);
+    // free_worker_threads(wts);
+
+    // fclose(f);
+
+    // printf("FINISHING MAIN\n");
+
+    waitpid(0, NULL, 0);
+
     free_accounts(accounts, num_accounts);
 
-    free_transactions_queue(tq);
-
-    free_bank_thread(bt);
-    free_worker_threads(wts);
-
     fclose(f);
-
-    printf("FINISHING MAIN\n");
 
     return 0;
 }

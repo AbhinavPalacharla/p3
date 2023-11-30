@@ -1,8 +1,12 @@
+#define _GNU_SOURCE
 #include "bank_thread.h"
 #include <pthread.h>
 #include "utils.h"
 #include <time.h>
 #include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 extern int num_transactions_processed;
 extern pthread_mutex_t num_transactions_processed_mutex;
@@ -23,8 +27,19 @@ extern int num_threads_with_work;
 extern pthread_mutex_t threads_waiting_for_bcast_mutex;
 extern int num_threads_waiting_for_bcast;
 
+extern int pid;
+
 void *bank_thread_handler(void *arg) {
     BankThreadHandlerArgs *args = (BankThreadHandlerArgs *) arg;
+
+    // sigset_t set; 
+    // int sig;
+    // sigemptyset(&set);
+    // sigaddset(&set, SIGUSR2);
+
+    // sigprocmask(SIG_BLOCK, &set, NULL);
+
+    // printf("HELLO\n");
 
     while(true) {
         //listen for wakeup
@@ -40,6 +55,15 @@ void *bank_thread_handler(void *arg) {
         // printf("BANK THREAD ISSUING REWARD\n");
         issue_reward(args->accounts, args->num_accounts);
         // printf("BANK THREAD ISSUED REWARDS\n");
+
+        printf("BANK THREAD WAKING UP PUDDLES\n");
+        if(num_threads_with_work != 0) {
+            kill(pid, SIGCONT);
+        }
+
+        // sigwait(&set, &sig);
+
+        // printf("BANK THREAD WOKEN UP BY PUDDLES\n");
         
         view_accounts(args->accounts, args->num_accounts);
 
@@ -54,6 +78,8 @@ void *bank_thread_handler(void *arg) {
 
         if(num_threads_with_work == 0) {
             printf("NO WORKER THREADS RUNNING, EXITING BANK THREAD\n");
+            printf("BANK THREAD WAKING UP PUDDLES TO QUIT\n");
+            kill(pid, SIGUSR2);
             return NULL;
         }
     }

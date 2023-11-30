@@ -209,7 +209,6 @@ void *thread_handler(void *arg) {
                         //     exit(1);
                         //     //return NULL
                         // }
-
                     }
             }
         }        
