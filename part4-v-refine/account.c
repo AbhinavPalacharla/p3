@@ -88,29 +88,30 @@ int read_num_accounts(FILE *f)
     return num_accounts;
 }
 
-void puddles_read_accounts(account *accounts, char *mem, int num_accounts)
+void puddles_read_accounts(account *accounts, char *act_info, int num_accounts)
 {
-    size_t len = 128; char *line = malloc(sizeof(char) * len);
+    // size_t len = 128; char *line = malloc(sizeof(char) * len);
 
-    FILE *f = fmemopen((char *)mem, strlen(mem), "r");
+    char *tok = strtok(act_info, "\n");
 
     for (int i = 0; i < num_accounts; i++)
     {
-        // getline(&line, &len, f); // skip index line
+        // account number
+        if(i != 0) { tok = strtok(NULL, "\n"); }
+        strcpy(accounts[i].account_number, strip(tok));
 
-        getline(&line, &len, f); // account number
-        strcpy(accounts[i].account_number, strip(line));
+        // account password
+        tok = strtok(NULL, "\n");
+        strcpy(accounts[i].password, strip(tok));
 
-        getline(&line, &len, f); // account password
-        strcpy(accounts[i].password, strip(line));
-
-        getline(&line, &len, f); // initial balance
+       // initial balance
+        tok = strtok(NULL, "\n");
 
         //20% of initial balance for puddles
-        accounts[i].balance = atof(strip(line)) * 0.2;
+        accounts[i].balance = atof(strip(tok)) * 0.2;
 
-        getline(&line, &len, f); // reward rate
-
+        // reward rate
+        tok = strtok(NULL, "\n");
         //flat 2% for savings account
         accounts[i].reward_rate = 0.02;
 
@@ -122,7 +123,37 @@ void puddles_read_accounts(account *accounts, char *mem, int num_accounts)
         }
     }
 
-    free(line);
+    // free(line);
+
+    // for (int i = 0; i < num_accounts; i++)
+    // {
+    //     // getline(&line, &len, f); // skip index line
+
+    //     getline(&line, &len, f); // account number
+    //     strcpy(accounts[i].account_number, strip(line));
+
+    //     getline(&line, &len, f); // account password
+    //     strcpy(accounts[i].password, strip(line));
+
+    //     getline(&line, &len, f); // initial balance
+
+    //     //20% of initial balance for puddles
+    //     accounts[i].balance = atof(strip(line)) * 0.2;
+
+    //     getline(&line, &len, f); // reward rate
+
+    //     //flat 2% for savings account
+    //     accounts[i].reward_rate = 0.02;
+
+    //     accounts[i].transaction_tracter = 5000;
+
+    //     if(pthread_mutex_init(&accounts[i].ac_lock, NULL) != 0) {
+    //         printf("Error initializing mutex\n");
+    //         exit(1);
+    //     }
+    // }
+
+    // free(line);
 }
 
 void read_accounts(account *accounts, FILE *f, int num_accounts, char *mem)

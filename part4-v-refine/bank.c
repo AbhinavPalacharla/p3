@@ -105,8 +105,10 @@ int main(int argc, char **argv) {
 
         memcpy(local_act_info, shared_mem, sizeof(account) * num_accounts);
 
-        // printf("Local account info: \n");
-        // printf("%s\n", local_act_info);
+        printf("Local account info: \n");
+        printf("%s\n", local_act_info);
+
+        // exit(0);
 
         //Free shared memory after copying it
         munmap(shared_mem, sizeof(account) * num_accounts);
@@ -117,6 +119,8 @@ int main(int argc, char **argv) {
 
         // printf("PUDDLES ACCOUNTS: \n");
         // print_accounts(accounts, num_accounts);
+
+        // exit(0);
 
         sigwait(&while_set, &while_sig);
         printf("PUDDLES RECIEVED SIG FROM DUCK BANK THREAD\n");
@@ -152,7 +156,7 @@ int main(int argc, char **argv) {
 
         kill(pid, SIGUSR1); //signal puddles to read from shared mem
 
-        /*LOAD TRANSACTIONS*/
+        // /*LOAD TRANSACTIONS*/
         TransactionQueue *tq = init_transaction_queue();
 
         size_t len = 128; char *line = malloc(sizeof(char) * len);  ssize_t read;
