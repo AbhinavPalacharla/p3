@@ -81,31 +81,24 @@ void puddles_read_accounts(account *accounts, char *mem, int num_accounts)
 {
     size_t len = 128; char *line = malloc(sizeof(char) * len);
 
-    // FILE *f = fmemopen((char *)mem, strlen(mem), "r");
-
-
-
     for (int i = 0; i < num_accounts; i++)
     {
-        // getline(&line, &len, f); // skip index line
-
-        // getline(&line, &len, f); // account number
+        // account number
         line = strtok(mem, "\n");
         strcpy(accounts[i].account_number, strip(line));
 
-        // getline(&line, &len, f); // account password
+        // account password
         line = strtok(mem, "\n");
         strcpy(accounts[i].password, strip(line));
 
-        // getline(&line, &len, f); // initial balance
+       // initial balance
         line = strtok(mem, "\n");
 
         //20% of initial balance for puddles
         accounts[i].balance = atof(strip(line)) * 0.2;
 
-        // getline(&line, &len, f); // reward rate
+        // reward rate
         line = strtok(mem, "\n");
-
         //flat 2% for savings account
         accounts[i].reward_rate = 0.02;
 
@@ -118,8 +111,6 @@ void puddles_read_accounts(account *accounts, char *mem, int num_accounts)
     }
 
     free(line);
-
-    free(mem);
 
     // fclose(f);
 }
