@@ -1,0 +1,48 @@
+==60439== Memcheck, a memory error detector
+==60439== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==60439== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==60439== Command: ./bank input-1.txt
+==60439== 
+Thread Started...
+T# 178884896 FINISHED
+Thread Started...
+T# 212701472 FINISHED
+Thread Started...
+T# 153522464 FINISHED
+Thread Started...
+T# 145068320 FINISHED
+Thread Started...
+T# 195793184 FINISHED
+Thread Started...
+T# 187339040 FINISHED
+Thread Started...
+T# 161976608 FINISHED
+Thread Started...
+T# 136614176 FINISHED
+Thread Started...
+T# 204247328 FINISHED
+Thread Started...
+T# 170430752 FINISHED
+
+ACCOUNTS:
+
+0 balance: 3111685.13
+1 balance: 2016708.08
+2 balance: 3248744.20
+3 balance: 3889910.50
+4 balance: 2164242.04
+5 balance: 2119930.00
+6 balance: 2206168.18
+7 balance: 2306013.02
+8 balance: 2788273.79
+9 balance: 2011539.14
+
+==60439== 
+==60439== HEAP SUMMARY:
+==60439==     in use at exit: 0 bytes in 0 blocks
+==60439==   total heap usage: 480,063 allocs, 480,063 frees, 13,820,198 bytes allocated
+==60439== 
+==60439== All heap blocks were freed -- no leaks are possible
+==60439== 
+==60439== For lists of detected and suppressed errors, rerun with: -s
+==60439== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
