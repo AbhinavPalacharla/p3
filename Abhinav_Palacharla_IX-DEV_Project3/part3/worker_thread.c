@@ -108,7 +108,7 @@ void *thread_handler(void *arg) {
                         t = args->tq->dequeue(args->tq);
                     }
                     
-                    // printf(">>TRANS#: %d | T# %d RUNNING PROC | VALID#: %d, INVALID#: %d, TOTAL: %d\n", num_transactions_processed, args->id, num_valid_trans, num_invalid_trans, num_total_trans);
+                    printf(">>TRANS#: %d | T# %d RUNNING PROC | VALID#: %d, INVALID#: %d, TOTAL: %d\n", num_transactions_processed, args->id, num_valid_trans, num_invalid_trans, num_total_trans);
                 }
         } else {
         /*
@@ -178,10 +178,10 @@ void *thread_handler(void *arg) {
 
                             if(num_threads_with_work == 0) {
                                 //sync threads and exit
-                                // printf("T# %d AT EXIT BARRIER\n", args->id);
+                                printf("T# %d AT EXIT BARRIER\n", args->id);
                                 // pthread_barrier_wait(&exit_barrier);
-                                // printf("T# %d EXITING...\n", args->id);
-                                // printf("T# %d SETTING THREAD EXIT FLAG\n", args->id);
+                                printf("T# %d EXITING...\n", args->id);
+                                printf("T# %d SETTING THREAD EXIT FLAG\n", args->id);
                                 thread_exit_flag = 1;
                                 // exit(1);
                                 //return NULL
