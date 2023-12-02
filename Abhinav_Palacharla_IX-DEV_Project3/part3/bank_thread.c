@@ -54,7 +54,8 @@ void *bank_thread_handler(void *arg) {
 
         if(num_threads_with_work == 0) {
             printf("NO WORKER THREADS RUNNING, EXITING BANK THREAD\n");
-            return NULL;
+            while(1);
+            // return NULL;
         }
     }
 }

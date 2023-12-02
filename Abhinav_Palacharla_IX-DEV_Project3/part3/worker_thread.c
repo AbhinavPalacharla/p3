@@ -197,7 +197,8 @@ void *thread_handler(void *arg) {
                         if(thread_exit_flag == 1) {
                             // sleep(20);
                             printf("T# %d EXITING\n", args->id);
-                            return NULL;
+                            while(1);
+                            // return NULL;
                         }
 
                         //check if all threads complete and exit
